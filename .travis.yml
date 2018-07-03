@@ -49,4 +49,5 @@ deploy:
   skip_cleanup: true
   on:
     tags: true 
-    rvm: 4.5.90
+    all_branches: true
+    rvm: 4.6.90
