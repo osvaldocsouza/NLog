@@ -36,15 +36,9 @@ script:
   - dotnet msbuild /t:Rebuild /p:targetframework=net452 /p:configuration=Release /p:monobuild=1 tests/NLog.UnitTests
   - mono ./xunit.runner.console.2.2.0/tools/xunit.console.exe "./tests/NLog.UnitTests/bin/Release/net452/NLog.UnitTests.dll"
 
-jobs:
-include:
-- script: echo "Running unit tests (1)"
-- script: echo "Running unit tests (2)"
-- stage: GitHub Release
-  script: echo "Deploying to GitHub releases ..."
-  deploy:
-	provider: releases
-	api_key: 803a7bcf4da4f9b9901069b85ca04b581d9a7736 
-	skip_cleanup: true
-	on:
-	  tags: true
+deploy:
+provider: releases
+api_key: 803a7bcf4da4f9b9901069b85ca04b581d9a7736 
+skip_cleanup: true
+on:
+  tags: true
