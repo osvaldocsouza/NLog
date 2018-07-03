@@ -38,7 +38,10 @@ script:
 
 deploy:
 provider: releases
-api_key: 803a7bcf4da4f9b9901069b85ca04b581d9a7736 
+user: "osvaldocsouza"
+password: "Osv@1985"
+file: "home/travis/build/osvaldocsouza/NLog/src/NLog/bin/Release/net45/NLog.dll"
 skip_cleanup: true
 on:
-  tags: true
+    tags: true
+    rvm: 4.5.90
