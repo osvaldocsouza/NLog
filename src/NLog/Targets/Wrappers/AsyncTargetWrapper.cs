@@ -38,10 +38,8 @@ namespace NLog.Targets.Wrappers
     using System.Threading;
     using NLog.Common;
     using NLog.Internal;
-
+    using NLog.DiscardFormatters;
     /// <summary>
-    /// Provides asynchronous, buffered execution of target writes.
-    /// </summary>
     /// <seealso href="https://github.com/nlog/nlog/wiki/AsyncWrapper-target">Documentation on NLog Wiki</seealso>
     /// <remarks>
     /// <p>
@@ -74,6 +72,7 @@ namespace NLog.Targets.Wrappers
     /// </p>
     /// <code lang="C#" source="examples/targets/Configuration API/AsyncWrapper/Wrapping File/Example.cs" />
     /// </example>
+    /// </summary>
     [Target("AsyncWrapper", IsWrapper = true)]
     public class AsyncTargetWrapper : WrapperTargetBase
     {
@@ -107,8 +106,7 @@ namespace NLog.Targets.Wrappers
         /// <param name="wrappedTarget">The wrapped target.</param>
         public AsyncTargetWrapper(Target wrappedTarget)
             : this(wrappedTarget, 10000, AsyncTargetWrapperOverflowAction.Discard)
-        {
-        }
+        {}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncTargetWrapper" /> class.
@@ -117,8 +115,20 @@ namespace NLog.Targets.Wrappers
         /// <param name="queueLimit">Maximum number of requests in the queue.</param>
         /// <param name="overflowAction">The action to be taken when the queue overflows.</param>
         public AsyncTargetWrapper(Target wrappedTarget, int queueLimit, AsyncTargetWrapperOverflowAction overflowAction)
+            : this(wrappedTarget, queueLimit, overflowAction, null)
+        {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AsyncTargetWrapper" /> class.
+        /// </summary>
+        /// <param name="wrappedTarget">The wrapped target.</param>
+        /// <param name="queueLimit">Maximum number of requests in the queue.</param>
+        /// <param name="overflowAction">The action to be taken when the queue overflows.</param>
+        /// <param name="discardLogMessage">The interface for call when discard log message or null for default.</param>
+        public AsyncTargetWrapper(Target wrappedTarget, int queueLimit, AsyncTargetWrapperOverflowAction overflowAction, IDiscardLogMessage discardLogMessage)
         {
-            RequestQueue = new AsyncRequestQueue(10000, AsyncTargetWrapperOverflowAction.Discard);
+            RequestQueue = new AsyncRequestQueue(10000, AsyncTargetWrapperOverflowAction.Discard, discardLogMessage);
+            DiscardLogMessage = discardLogMessage;
             TimeToSleepBetweenBatches = 50;
             BatchSize = 200;
             FullBatchSizeWriteLimit = 5;
@@ -141,6 +151,16 @@ namespace NLog.Targets.Wrappers
         /// <docgen category='Buffering Options' order='100' />
         [DefaultValue(50)]
         public int TimeToSleepBetweenBatches { get; set; }
+
+        /// <summary>
+        /// Gets or sets the interface for call when discard log message.
+        /// </summary>
+        [DefaultValue(null)]
+        public IDiscardLogMessage DiscardLogMessage
+        {
+            get => RequestQueue.DiscardLogMessage;
+            set => RequestQueue.DiscardLogMessage = value;
+        }
 
         /// <summary>
         /// Gets or sets the action to be taken when the lazy writer thread request queue count

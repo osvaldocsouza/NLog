@@ -36,11 +36,12 @@ namespace NLog.Targets.Wrappers
     using System;
     using System.Collections.Generic;
     using Common;
+    using NLog.DiscardFormatters;
 
     /// <summary>
     /// Asynchronous request queue.
     /// </summary>
-	internal class AsyncRequestQueue
+    internal class AsyncRequestQueue
     {
         private readonly Queue<AsyncLogEventInfo> _logEventInfoQueue = new Queue<AsyncLogEventInfo>();
 
@@ -49,10 +50,14 @@ namespace NLog.Targets.Wrappers
         /// </summary>
         /// <param name="requestLimit">Request limit.</param>
         /// <param name="overflowAction">The overflow action.</param>
-        public AsyncRequestQueue(int requestLimit, AsyncTargetWrapperOverflowAction overflowAction)
+        /// <param name="discardLogMessage">The interface for call when discard log message or null for default.</param>
+        public AsyncRequestQueue(int requestLimit, 
+            AsyncTargetWrapperOverflowAction overflowAction,
+            IDiscardLogMessage discardLogMessage)
         {
             RequestLimit = requestLimit;
             OnOverflow = overflowAction;
+            DiscardLogMessage = discardLogMessage;
         }
 
         /// <summary>
@@ -65,6 +70,11 @@ namespace NLog.Targets.Wrappers
         /// the queue and another request is enqueued.
         /// </summary>
         public AsyncTargetWrapperOverflowAction OnOverflow { get; set; }
+
+        /// <summary>
+        /// Get or sets the discard formatter message.
+        /// </summary>
+        public IDiscardLogMessage DiscardLogMessage { get; set; }
 
         /// <summary>
         /// Gets the number of requests currently in the queue.
@@ -92,14 +102,16 @@ namespace NLog.Targets.Wrappers
             {
                 if (_logEventInfoQueue.Count >= RequestLimit)
                 {
-                    InternalLogger.Debug("Async queue is full - Teste - Travis 1");
+                    InternalLogger.Debug("Async queue is full");
                     switch (OnOverflow)
                     {
                         case AsyncTargetWrapperOverflowAction.Discard:
-                            InternalLogger.Debug("Discarding one element from queue - Teste - Travis 1");
-                            _logEventInfoQueue.Dequeue();
+                            InternalLogger.Debug("Discarding one element from queue");
+                            AsyncLogEventInfo discardLogEvent = _logEventInfoQueue.Dequeue();
+                            if (DiscardLogMessage != null && DiscardLogMessage.HasProperties(discardLogEvent)) {
+                                DiscardLogMessage.SaveMessage(discardLogEvent.LogEvent);
+                            }
                             break;
-
                         case AsyncTargetWrapperOverflowAction.Grow:
                             InternalLogger.Debug("The overflow action is Grow, adding element anyway");
                             break;

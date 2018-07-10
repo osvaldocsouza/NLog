@@ -55,41 +55,47 @@ namespace NLog
         public static readonly LogLevel Debug = new LogLevel("Debug", 1);
 
         /// <summary>
+        /// Discard log level.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
+        public static readonly LogLevel Discard = new LogLevel("Discard", 2);
+
+        /// <summary>
         /// Info log level.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        public static readonly LogLevel Info = new LogLevel("Info", 2);
+        public static readonly LogLevel Info = new LogLevel("Info", 3);
 
         /// <summary>
         /// Warn log level.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        public static readonly LogLevel Warn = new LogLevel("Warn", 3);
+        public static readonly LogLevel Warn = new LogLevel("Warn", 4);
 
         /// <summary>
         /// Error log level.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        public static readonly LogLevel Error = new LogLevel("Error", 4);
+        public static readonly LogLevel Error = new LogLevel("Error", 5);
 
         /// <summary>
         /// Fatal log level.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        public static readonly LogLevel Fatal = new LogLevel("Fatal", 5);
+        public static readonly LogLevel Fatal = new LogLevel("Fatal", 6);
 
         /// <summary>
         /// Off log level.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        public static readonly LogLevel Off = new LogLevel("Off", 6);
+        public static readonly LogLevel Off = new LogLevel("Off", 7);
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        private static readonly IList<LogLevel> allLevels = new List<LogLevel> { Trace, Debug, Info, Warn, Error, Fatal, Off }.AsReadOnly();
+        private static readonly IList<LogLevel> allLevels = new List<LogLevel> { Trace, Debug, Info, Warn, Error, Fatal, Discard, Off }.AsReadOnly();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Type is immutable")]
-        private static readonly IList<LogLevel> allLoggingLevels = new List<LogLevel> {Trace, Debug, Info, Warn, Error, Fatal}.AsReadOnly();
+        private static readonly IList<LogLevel> allLoggingLevels = new List<LogLevel> {Trace, Debug, Info, Warn, Error, Fatal, Discard }.AsReadOnly();
 
         /// <summary>
         /// Gets all the available log levels (Trace, Debug, Info, Warn, Error, Fatal, Off).
@@ -255,14 +261,16 @@ namespace NLog
                 case 1:
                     return Debug;
                 case 2:
-                    return Info;
+                    return Discard;
                 case 3:
-                    return Warn;
+                    return Info;
                 case 4:
-                    return Error;
+                    return Warn;
                 case 5:
-                    return Fatal;
+                    return Error;
                 case 6:
+                    return Fatal;
+                case 7:
                     return Off;
 
                 default:
@@ -290,6 +298,11 @@ namespace NLog
             if (levelName.Equals("Debug", StringComparison.OrdinalIgnoreCase))
             {
                 return Debug;
+            }
+
+            if (levelName.Equals("Discard", StringComparison.OrdinalIgnoreCase))
+            {
+                return Discard;
             }
 
             if (levelName.Equals("Info", StringComparison.OrdinalIgnoreCase))

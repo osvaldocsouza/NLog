@@ -606,8 +606,12 @@ namespace NLog.Targets
             }
         }
 
+        /// <summary>
+        /// Process write event into database.
+        /// </summary>
+        /// <param name="logEvent"></param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "It's up to the user to ensure proper quoting.")]
-        private void WriteEventToDatabase(LogEventInfo logEvent)
+        protected virtual void WriteEventToDatabase(LogEventInfo logEvent)
         {
             //Always suppress transaction so that the caller does not rollback logging if they are rolling back their transaction.
             using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Suppress))
@@ -674,7 +678,12 @@ namespace NLog.Targets
             return sb.ToString();
         }
 
-        private void EnsureConnectionOpen(string connectionString)
+        /// <summary>
+        /// Open (if necessary) and return the database connection.
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
+        protected IDbConnection EnsureConnectionOpen(string connectionString)
         {
             if (_activeConnection != null)
             {
@@ -683,16 +692,15 @@ namespace NLog.Targets
                     InternalLogger.Trace("DatabaseTarget(Name={0}): Close connection because of opening new.", Name);
                     CloseConnection();
                 }
-            }
 
-            if (_activeConnection != null)
-            {
-                return;
+                return _activeConnection;
             }
 
             InternalLogger.Trace("DatabaseTarget(Name={0}): Open connection.", Name);
             _activeConnection = OpenConnection(connectionString);
             _activeConnectionString = connectionString;
+
+            return _activeConnection;
         }
 
         private void CloseConnection()
